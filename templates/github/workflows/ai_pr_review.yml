@@ -42,7 +42,8 @@ jobs:
 
     - name: Install dependencies
       run: |
-        gem install ai_pr_reviewer
+        gem install specific_install
+        gem specific_install https://github.com/brilyuhns/ai_pr_reviewer.git
     
     # - name: Cache dependencies
     #   uses: actions/cache@v3
