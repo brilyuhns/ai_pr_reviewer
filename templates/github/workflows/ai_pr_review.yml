@@ -1,32 +1,66 @@
-name: AI PR Review
+name: PR Reviewer
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number'
+        required: true
+        default: ''
 
 jobs:
   review:
+    if: |
+      (github.event_name == 'pull_request') ||
+      (github.event_name == 'issue_comment' && 
+       github.event.issue.pull_request && 
+       contains(github.event.comment.body, '/review'))
     runs-on: ubuntu-latest
-    permissions:
+    # defaults:
+    #   run:
+    #     working-directory: ./ai_pr_reviewer # this is the directory of the pr_reviewer.rb file
+    #     shell: bash
+    permissions:  
       contents: read
       pull-requests: write
+      issues: write
+
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2.2'
+        bundler-cache: false
+
+    - name: Install dependencies
+      run: |
+        gem install ai_pr_reviewer
+    
+    # - name: Cache dependencies
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: ai_pr_reviewer/vendor/bundle
+    #     key: ${{ runner.os }}-gems-${{ hashFiles('ai_pr_reviewer/Gemfile.lock') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-gems-
       
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '3.2'
-          bundler-cache: true
-      
-      - name: Install dependencies
-        run: |
-          gem install ai_pr_reviewer
-      
-      - name: Review PR
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-        run: |
-          ai-pr-review ${{ github.event.pull_request.number }} 
+    - name: Run PR Review
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+      run: |
+        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+        else
+          PR_NUMBER="${{ github.event.issue.number }}"
+        fi
+        ruby pr_reviewer.rb $PR_NUMBER 
