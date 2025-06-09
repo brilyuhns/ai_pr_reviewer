@@ -31,7 +31,7 @@ class PRReviewer
       review = get_perplexity_review(pr, diff)
       
       # Post comments
-      # post_review_comments(pr_number, summary, review)
+      post_review_comments(pr_number, summary, review)
       
       puts "Review completed successfully!"
     rescue Octokit::Error => e
@@ -68,13 +68,13 @@ class PRReviewer
       - Please format your response as a JSON object with the following structure. Ensure the feedback is in markdown format: 
         {
           "summary": "overall review summary",
-          "inlineComments": [
+          "inline_comments": [
             { "path": "file_path", "line": line_number, "body": "comment text" }
           ],
-          "generalFeedback": "general feedback text",
-          "performanceFeedback": "performance feedback text",
-          "securityFeedback": "security feedback text",
-          "testingRecommendation": "testing recommendation text"
+          "general_feedback": "general feedback text",
+          "performance_feedback": "performance feedback text",
+          "security_feedback": "security feedback text",
+          "testing_recommendation": "testing recommendation text"
         }
       - USE PR description as context if available
       - NEVER include a section if it has no critical, actionable feedback.
@@ -124,7 +124,7 @@ class PRReviewer
       if response.success?
         result = JSON.parse(response.body)
         review_text = result['choices'][0]['message']['content']
-        p "## AI Review\n\n#{review_text}"
+        # p "## AI Review\n\n#{review_text}"
       else
         raise "Perplexity API Error: #{response.code} - #{response.body}"
       end
@@ -134,9 +134,73 @@ class PRReviewer
     end
   end
 
+
+  ### sample review
+#   {
+# "summary": "Basic model structure is in place, but needs enhancements for a complete appointment system.",
+# "inline_comments": [
+# { "path": "app/models/appointment.rb", "line": 2, "body": "Consider adding validations for appointment_time to ensure it's not in the past and falls within valid business hours." },
+# { "path": "app/models/appointment.rb", "line": 3, "body": "Add status tracking (pending, confirmed, canceled) and duration attributes for a more complete appointment model." },
+# { "path": "db/migrate/20250609115307_create_appointments.rb", "line": 5, "body": "Consider adding additional fields like duration, status, and contact information for the appointment maker." }
+# ],
+# "general_feedback": "- Consider implementing a two-sided appointment relationship (user making vs. user receiving the appointment)\n- Add an index on appointment_time to optimize queries for date ranges\n- Consider using a BookingType or category to classify different appointment types",
+# "testing_recommendation": "- Add validation tests to ensure appointment times are valid\n- Test appointment creation and cancellation flow",
+# "performance_feedback": "- Consider using a background job for appointment confirmation emails\n- Optimize queries for appointment search by time range",
+# "security_feedback": "- Add authentication to the appointment creation and cancellation endpoints\n- Consider using a secure token for appointment confirmation"
+# }
+
   def post_review_comments(pr_number, summary, review)
-    p comment = [summary, review].join("\n\n")
-    @github_client.add_comment(@repository, pr_number, comment)
+    begin
+      # Parse the review JSON
+      review_data = JSON.parse(review)
+      
+      # Create the main review body with general feedback
+      main_comment = []
+      main_comment << "# AI Review Summary\n\n#{review_data['summary']}" if review_data['summary']
+      main_comment << "\n\n## General Feedback\n#{review_data['general_feedback']}" if review_data['general_feedback']
+      main_comment << "\n\n## Performance Feedback\n#{review_data['performance_feedback']}" if review_data['performance_feedback']
+      main_comment << "\n\n## Security Feedback\n#{review_data['security_feedback']}" if review_data['security_feedback']
+      main_comment << "\n\n## Testing Recommendations\n#{review_data['testing_recommendation']}" if review_data['testing_recommendation']
+      
+      # Get the PR's latest commit SHA
+      pr_commits = @github_client.pull_request_commits(@repository, pr_number)
+      latest_commit_sha = pr_commits.last.sha
+      
+      # Prepare review parameters
+      review_params = {
+        commit_id: latest_commit_sha,
+        body: main_comment.join,
+        event: 'COMMENT'
+      }
+      
+      # Add inline comments if they exist
+      if review_data['inline_comments']&.any?
+        review_params[:comments] = review_data['inline_comments'].map do |comment|
+          {
+            path: comment['path'],
+            position: comment['line'],
+            body: comment['body']
+          }
+        end
+      end
+      
+      # Create a single review with both body and inline comments
+      @github_client.create_pull_request_review(
+        @repository,
+        pr_number,
+        review_params
+      )
+      
+      puts "Successfully posted review!"
+    rescue JSON::ParserError => e
+      puts "Error parsing review JSON: #{e.message}"
+      # Fallback to posting the raw review if JSON parsing fails
+      @github_client.add_comment(@repository, pr_number, [summary, review].join("\n\n"))
+    rescue Octokit::Error => e
+      puts "GitHub API Error: #{e.message}"
+    rescue StandardError => e
+      puts "Error posting review: #{e.message}"
+    end
   end
 end
 
