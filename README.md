@@ -28,11 +28,9 @@ Or install it globally:
 $ gem install ai_pr_reviewer
 ```
 
-The gem will automatically install a GitHub Actions workflow file in your repository's `.github/workflows` directory.
-
 ## Configuration
 
-1. Create a `.env` file in your project root with the following variables:
+1. For local usage, create a `.env` file in your project root with the following variables:
 ```
 GITHUB_TOKEN=your_github_token_here
 GITHUB_REPOSITORY=owner/repo_name
@@ -42,6 +40,8 @@ PERPLEXITY_API_KEY=your_perplexity_api_key_here
 2. For GitHub Actions, add these secrets to your repository:
 - `GITHUB_TOKEN` (automatically provided by GitHub Actions)
 - `PERPLEXITY_API_KEY` (add this in your repository secrets)
+- Run `ai_pr_review install` to automatically install a GitHub Actions workflow file in your repository's `.github/workflows` directory.
+
 
 ## Usage
 
