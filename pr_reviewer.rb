@@ -10,8 +10,6 @@ Dotenv.load('.env')
 
 class PRReviewer
   def initialize
-    # @github_client = Octokit::Client.new(access_token: ENV['GITHUB_TOKEN'])
-    # @repository = ENV['GITHUB_REPOSITORY']
     @github_client = Octokit::Client.new(access_token: ENV['GITHUB_TOKEN'])
     @repository = ENV['GITHUB_REPOSITORY']
   end
