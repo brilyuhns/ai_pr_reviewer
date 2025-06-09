@@ -37,16 +37,20 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.2'
-        bundler-cache: true
+        ruby-version: '3.2.2'
+        bundler-cache: false
+
+    - name: Install dependencies
+      run: |
+        bundle install
     
-    - name: Cache dependencies
-      uses: actions/cache@v3
-      with:
-        path: vendor/bundle
-        key: ${{ runner.os }}-gems-${{ hashFiles('Gemfile.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-gems-
+    # - name: Cache dependencies
+    #   uses: actions/cache@v3
+    #   with:
+    #     path: ai_pr_reviewer/vendor/bundle
+    #     key: ${{ runner.os }}-gems-${{ hashFiles('ai_pr_reviewer/Gemfile.lock') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-gems-
       
     - name: Run PR Review
       env:
