@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require "ai_pr_reviewer"
+require_relative "../lib/pr_reviewer"
+
+if ARGV.length != 1
+  puts "Usage: ai-pr-review <pr_number>"
+  exit 1
+end
+
+reviewer = PRReviewer.new
+reviewer.review_pr(ARGV[0].to_i) 

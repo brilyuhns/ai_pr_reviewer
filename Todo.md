@@ -17,6 +17,8 @@ Perplexity API
 - The app will then post the PR reviews from Perplexity to the PR comments
 - The app will have a sample github action workflow that will be used to test the app
 - The app will utilise a config file to store the github token and perplexity api key
+- Package the app as a gem that can be added to a ruby/rails project
+- Installing the project should add the github actions file in the correct place
 
 
 

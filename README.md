@@ -1,38 +1,72 @@
-# PR Reviewer
+# AI PR Reviewer
 
-An automated PR review tool that generates summaries and provides intelligent reviews using GitHub API and Perplexity API.
+An AI-powered Pull Request reviewer that uses the Perplexity API to provide actionable feedback on your pull requests.
 
 ## Features
 
-- Fetches PR details and diffs from GitHub
-- Generates PR summaries
-- Gets intelligent reviews using Perplexity API
-- Posts summaries and reviews as PR comments
-- Runs as a GitHub Action
+- Automatically reviews pull requests using AI
+- Provides actionable feedback on code quality, bugs, security, and performance
+- Adds inline comments for specific code feedback
+- Integrates with GitHub Actions for automated reviews
+- Supports both manual and automated workflows
 
-## Setup
+## Installation
 
-1. Install dependencies:
-```bash
-bundle install
+Add this line to your application's Gemfile:
+
+```ruby
+gem 'ai_pr_reviewer'
 ```
 
-2. Configure environment variables:
-- Copy `.env.template` to `.env`
-- Add your GitHub token and Perplexity API key
-
-## Usage
-
-### As a GitHub Action
-
-Add the workflow file to your repository at `.github/workflows/pr-reviewer.yml`. The action will run automatically on new PRs or when requested via comment.
-
-### Local Usage
-
+And then execute:
 ```bash
-ruby pr_reviewer.rb <pr_number>
+$ bundle install
 ```
+
+Or install it globally:
+```bash
+$ gem install ai_pr_reviewer
+```
+
+The gem will automatically install a GitHub Actions workflow file in your repository's `.github/workflows` directory.
 
 ## Configuration
 
-The tool can be configured using environment variables or a config file. See `.env.template` for available options. 
+1. Create a `.env` file in your project root with the following variables:
+```
+GITHUB_TOKEN=your_github_token_here
+GITHUB_REPOSITORY=owner/repo_name
+PERPLEXITY_API_KEY=your_perplexity_api_key_here
+```
+
+2. For GitHub Actions, add these secrets to your repository:
+- `GITHUB_TOKEN` (automatically provided by GitHub Actions)
+- `PERPLEXITY_API_KEY` (add this in your repository secrets)
+
+## Usage
+
+### Command Line
+
+Review a specific PR:
+```bash
+$ ai-pr-review PR_NUMBER
+```
+
+### GitHub Actions
+
+The installed workflow will automatically review pull requests when:
+- A new PR is opened
+- An existing PR is updated
+- A PR is reopened
+
+## Development
+
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests.
+
+## Contributing
+
+Bug reports and pull requests are welcome on GitHub at https://github.com/yourusername/ai_pr_reviewer.
+
+## License
+
+The gem is available as open source under the terms of the MIT License. 

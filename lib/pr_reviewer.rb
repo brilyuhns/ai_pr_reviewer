@@ -1,5 +1,3 @@
-#!/usr/bin/env ruby
-
 require 'octokit'
 require 'dotenv'
 require 'json'
@@ -44,7 +42,6 @@ class PRReviewer
   private
 
   def generate_summary(pr, diff)
-    # TODO: Implement summary generation
     "## PR Summary\n\n" \
     "**Title:** #{pr.title}\n" \
     "**Author:** #{pr.user.login}\n" \
@@ -86,15 +83,15 @@ class PRReviewer
   end
 
   def user_prompt(pr, diff)
-  <<~PROMPT
-    As a code reviewer, provide feedback for the following PR:
-     Pull Request Details:
-     Title: #{pr.title}
-     Description: #{pr.body}
-     
-     Changes (diff):
-     #{diff}
-   PROMPT
+    <<~PROMPT
+      As a code reviewer, provide feedback for the following PR:
+      Pull Request Details:
+      Title: #{pr.title}
+      Description: #{pr.body}
+      
+      Changes (diff):
+      #{diff}
+    PROMPT
   end
 
   def get_perplexity_review(pr, diff)
@@ -133,21 +130,6 @@ class PRReviewer
       "## AI Review\n\nError generating review: #{e.message}"
     end
   end
-
-
-  ### sample review
-#   {
-# "summary": "Basic model structure is in place, but needs enhancements for a complete appointment system.",
-# "inline_comments": [
-# { "path": "app/models/appointment.rb", "line": 2, "body": "Consider adding validations for appointment_time to ensure it's not in the past and falls within valid business hours." },
-# { "path": "app/models/appointment.rb", "line": 3, "body": "Add status tracking (pending, confirmed, canceled) and duration attributes for a more complete appointment model." },
-# { "path": "db/migrate/20250609115307_create_appointments.rb", "line": 5, "body": "Consider adding additional fields like duration, status, and contact information for the appointment maker." }
-# ],
-# "general_feedback": "- Consider implementing a two-sided appointment relationship (user making vs. user receiving the appointment)\n- Add an index on appointment_time to optimize queries for date ranges\n- Consider using a BookingType or category to classify different appointment types",
-# "testing_recommendation": "- Add validation tests to ensure appointment times are valid\n- Test appointment creation and cancellation flow",
-# "performance_feedback": "- Consider using a background job for appointment confirmation emails\n- Optimize queries for appointment search by time range",
-# "security_feedback": "- Add authentication to the appointment creation and cancellation endpoints\n- Consider using a secure token for appointment confirmation"
-# }
 
   def post_review_comments(pr_number, summary, review)
     begin
@@ -202,13 +184,4 @@ class PRReviewer
       puts "Error posting review: #{e.message}"
     end
   end
-end
-
-# Run the script
-if ARGV.length != 1
-  puts "Usage: ruby #{$0} <pr_number>"
-  exit 1
-end
-
-reviewer = PRReviewer.new
-reviewer.review_pr(ARGV[0].to_i) 
+end 
