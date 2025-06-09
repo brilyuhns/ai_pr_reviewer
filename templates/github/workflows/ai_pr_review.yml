@@ -64,4 +64,4 @@ jobs:
         else
           PR_NUMBER="${{ github.event.issue.number }}"
         fi
-        ruby pr_reviewer.rb $PR_NUMBER 
+        ai-pr-review $PR_NUMBER 
