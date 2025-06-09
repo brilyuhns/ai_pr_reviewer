@@ -3,9 +3,19 @@
 require "ai_pr_reviewer"
 require_relative "../lib/pr_reviewer"
 
-if ARGV.length != 1
-  puts "Usage: ai-pr-review <pr_number>"
+if ARGV.empty?
+  puts "Usage:"
+  puts "  ai-pr-review <pr_number>     # Review a specific PR"
+  puts "  ai-pr-review install         # Install GitHub Actions workflow"
   exit 1
+end
+
+if ARGV[0] == "install"
+  if AiPrReviewer.install_github_actions
+    exit 0
+  else
+    exit 1
+  end
 end
 
 reviewer = PRReviewer.new

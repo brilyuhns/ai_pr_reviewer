@@ -13,19 +13,22 @@ module AiPrReviewer
       FileUtils.mkdir_p(target_dir)
       if File.exist?(target)
         puts "GitHub Actions workflow already exists at #{target}"
+        false
       else
         FileUtils.cp(source, target)
         puts "Successfully installed GitHub Actions workflow at #{target}"
+        true
       end
+    rescue StandardError => e
+      puts "Error installing GitHub Actions workflow: #{e.message}"
+      false
     end
   end
 end
 
-# Hook into gem installation
-if defined?(Gem::Installer) && defined?(Gem::Installer::post_install)
-  Gem::Installer::post_install do |installer|
-    if installer.spec.name == 'ai_pr_reviewer'
-      AiPrReviewer.install_github_actions
-    end
+# Add post-install hook
+Gem.post_install do |installer|
+  if installer.spec.name == 'ai_pr_reviewer'
+    AiPrReviewer.install_github_actions
   end
 end 
